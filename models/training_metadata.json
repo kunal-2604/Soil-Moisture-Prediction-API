@@ -1,0 +1,28 @@
+{
+  "xgboost": {
+    "rmse": 1.7205625371590212,
+    "mae": 1.279879484952291,
+    "r2": 0.9873496189562095,
+    "split": "test",
+    "best_params": {
+      "n_estimators": 800,
+      "max_depth": 6,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 3,
+      "gamma": 0.1,
+      "reg_alpha": 0.1,
+      "reg_lambda": 1.0
+    }
+  },
+  "random_forest": {
+    "rmse": 1.731726172532508,
+    "mae": 1.2903895844437374,
+    "r2": 0.9871849258452491,
+    "split": "test"
+  },
+  "n_train": 56000,
+  "n_val": 12000,
+  "n_test": 12000
+}

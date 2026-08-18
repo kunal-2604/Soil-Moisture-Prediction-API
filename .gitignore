@@ -1,0 +1,98 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ─── Virtual Environments ─────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env/
+
+# ─── Jupyter / IPython ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── ML Model Artefacts ───────────────────────────────────────────────────────
+# Large binary model files — download or regenerate from training scripts
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.bin
+
+# Keep metadata and directory structure
+!models/.gitkeep
+!models/training_metadata.json
+
+# ─── Data Files ───────────────────────────────────────────────────────────────
+data/
+datasets/
+*.csv
+*.parquet
+*.feather
+*.arrow
+*.h5
+*.hdf5
+*.npy
+*.npz
+
+# ─── Logs & Reports ───────────────────────────────────────────────────────────
+logs/
+*.log
+reports/
+optuna_studies/
+mlruns/
+wandb/
+
+# ─── Environment & Secrets ────────────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+secrets.yaml
+secrets.json
+
+# ─── IDE / Editor ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+.pytest_cache/
+.tox/
+.coverage
+coverage.xml
+htmlcov/
+
+# ─── Type Checking ────────────────────────────────────────────────────────────
+.mypy_cache/
+.dmypy.json
+.pyright/
+
+# ─── FastAPI / Uvicorn ────────────────────────────────────────────────────────
+*.pid
+
+# ─── Miscellaneous ────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+.scratch/
