@@ -22,11 +22,10 @@ A production-ready **tabular regression pipeline** that predicts soil moisture p
 
 ## ✨ Features
 
-- **Dual models**: XGBoost (primary) + Random Forest (baseline), switchable per-request
+- **XGBoost model**: High-performance XGBoost Regressor model optimized for fast, accurate inference
 - **Physics-grounded features**: Hargreaves ET₀, FAO-56 Kc, soil field capacity & wilting point
 - **Rich response**: moisture %, status badge (Critical/Low/Optimal/Saturated), actionable recommendation, next-check interval
 - **Batch prediction**: Upload a CSV, get enriched results back
-- **Model comparison**: Optional side-by-side XGBoost vs RF output
 - **CORS-enabled**: Ready to connect to Flutter/web frontends
 - **Fast**: Typical inference latency < 50ms (reported via `X-Inference-Ms` header)
 
@@ -40,8 +39,7 @@ Raw Inputs (5 fields)
 Feature Engineering (ET₀, ETc, moisture stress, soil WHC/PWP, nonlinear interactions)
         ↓
     ┌───────────────────────┐
-    │  XGBoost Regressor    │  (primary)
-    │  Random Forest        │  (baseline / comparison)
+    │  XGBoost Regressor    │  (production model)
     └───────────────────────┘
         ↓
 moisture_pct ∈ [0, 100]   (clipped)
@@ -64,8 +62,6 @@ Rule-Based Recommendation Engine  →  text advice + next-check hours
 | `temperature` | `float` | −10 – 60 °C | Air temperature |
 | `humidity` | `float` | 0 – 100 % | Relative humidity |
 | `days_since_watering` | `float` | 0 – 60 days | Days since last irrigation |
-| `model` *(optional)* | `string` | `xgboost` \| `random_forest` | Model to use (default: `xgboost`) |
-| `compare_rf` *(optional)* | `bool` | `true` / `false` | Also return RF prediction (default: `false`) |
 
 ### Response Output
 
@@ -82,7 +78,6 @@ Rule-Based Recommendation Engine  →  text advice + next-check hours
 | `next_check_hours` | `int` | Hours until next suggested check |
 | `crop_group` | `string` | Crop water demand group |
 | `model_used` | `string` | Which model was used |
-| `rf_moisture_pct` | `float?` | RF prediction (only if `compare_rf=true`) |
 
 ---
 
@@ -91,13 +86,12 @@ Rule-Based Recommendation Engine  →  text advice + next-check hours
 ```
 soil_moisture_prediction_dep/
 ├── main.py                  # FastAPI application (endpoints, CORS, lifespan)
-├── predict.py               # Inference wrapper: load models, run predict/predict_batch
+├── predict.py               # Inference wrapper: load XGBoost model, run predict/predict_batch
 ├── features.py              # Feature engineering layer (ET₀, Kc, WHC, PWP tables)
 ├── schemas.py               # Pydantic v2 request/response schemas
 ├── requirements.txt         # Python dependencies
 ├── models/
-│   ├── xgb_model.pkl        # Trained XGBoost pipeline (primary)
-│   ├── rf_baseline.pkl      # Trained Random Forest pipeline (baseline)
+│   ├── xgb_model.pkl        # Trained XGBoost pipeline (production model tracked in git)
 │   └── training_metadata.json  # Model metrics & hyperparameters
 └── README.md
 ```

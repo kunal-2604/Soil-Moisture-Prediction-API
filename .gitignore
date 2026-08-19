@@ -36,6 +36,9 @@ models/*.pth
 models/*.onnx
 models/*.bin
 
+# Track XGBoost model file for production deployment
+!models/xgb_model.pkl
+
 # Keep metadata and directory structure
 !models/.gitkeep
 !models/training_metadata.json

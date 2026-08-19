@@ -97,7 +97,7 @@ async def model_info():
 
     xgb_meta = meta.get("xgboost", {})
     return ModelInfoResponse(
-        model_name      = "XGBoost Regressor (primary) + Random Forest (baseline)",
+        model_name      = "XGBoost Regressor",
         rmse_test       = xgb_meta.get("rmse"),
         mae_test        = xgb_meta.get("mae"),
         r2_test         = xgb_meta.get("r2"),

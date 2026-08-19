@@ -35,25 +35,21 @@ from recommendation import get_full_advice
 
 MODELS_DIR = Path("models")
 _xgb_pipeline = None
-_rf_pipeline  = None
 
 
 def _load_models():
-    """Lazy-load models once, cache in module globals."""
-    global _xgb_pipeline, _rf_pipeline
+    """Lazy-load XGBoost model once, cache in module globals."""
+    global _xgb_pipeline
     if _xgb_pipeline is None:
         xgb_path = MODELS_DIR / "xgb_model.pkl"
-        rf_path  = MODELS_DIR / "rf_baseline.pkl"
 
         if not xgb_path.exists():
             raise FileNotFoundError(
                 f"Model not found at {xgb_path}. "
-                "Run `python src/generate_data.py` and `python src/train.py` first."
+                "Ensure models/xgb_model.pkl is present."
             )
         _xgb_pipeline = joblib.load(xgb_path)
-        if rf_path.exists():
-            _rf_pipeline = joblib.load(rf_path)
-    return _xgb_pipeline, _rf_pipeline
+    return _xgb_pipeline
 
 
 # ─── Core Predict Function ────────────────────────────────────────────────────
@@ -64,11 +60,11 @@ def predict(
     temperature:         float,
     humidity:            float,
     days_since_watering: float,
-    use_model:           str = "xgboost",  # "xgboost" | "random_forest"
-    return_rf_too:       bool = False,
+    use_model:           str = "xgboost",  # retained for endpoint compatibility
+    return_rf_too:       bool = False,     # retained for endpoint compatibility
 ) -> dict:
     """
-    Predict soil moisture % and return full structured result.
+    Predict soil moisture % and return full structured result using XGBoost model.
 
     Args:
         crop_type:            Crop name (e.g. "wheat", "rice", "tomato")
@@ -76,8 +72,8 @@ def predict(
         temperature:          Air temperature in °C  [0–60]
         humidity:             Relative humidity in % [0–100]
         days_since_watering:  Days since last irrigation [0–30]
-        use_model:            Which model to use for primary prediction
-        return_rf_too:        If True, also return RF prediction for comparison
+        use_model:            Retained for backwards compatibility (defaults to "xgboost")
+        return_rf_too:        Retained for backwards compatibility
 
     Returns:
         dict with:
@@ -88,9 +84,8 @@ def predict(
             next_check_hours   (int)
             crop_group         (str)
             model_used         (str)
-            rf_moisture_pct    (float, optional)
     """
-    xgb_pipe, rf_pipe = _load_models()
+    xgb_pipe = _load_models()
 
     # Build single-row DataFrame
     row = pd.DataFrame([{
@@ -104,9 +99,8 @@ def predict(
     # Feature engineering
     row_fe = engineer_features(row)
 
-    # Primary prediction
-    pipe = xgb_pipe if use_model == "xgboost" else (rf_pipe or xgb_pipe)
-    raw_pred = pipe.predict(row_fe)
+    # Primary prediction with XGBoost model
+    raw_pred = xgb_pipe.predict(row_fe)
     moisture_pct = float(np.clip(raw_pred[0], 0.0, 100.0))
 
     # Build full advice
@@ -114,14 +108,9 @@ def predict(
 
     result = {
         "moisture_pct":       round(moisture_pct, 1),
-        "model_used":         use_model,
+        "model_used":         "xgboost",
         **advice,
     }
-
-    # Optionally include RF comparison
-    if return_rf_too and rf_pipe is not None:
-        rf_pred = rf_pipe.predict(row_fe)
-        result["rf_moisture_pct"] = round(float(np.clip(rf_pred[0], 0, 100)), 1)
 
     return result
 
@@ -136,8 +125,7 @@ def predict_batch(df: pd.DataFrame, use_model: str = "xgboost") -> pd.DataFrame:
     Returns input DataFrame with added columns:
         moisture_pct, status, status_emoji, status_color, recommendation
     """
-    xgb_pipe, rf_pipe = _load_models()
-    pipe = xgb_pipe if use_model == "xgboost" else (rf_pipe or xgb_pipe)
+    pipe = _load_models()
 
     df_fe = engineer_features(df.copy())
     raw = pipe.predict(df_fe)
